@@ -1,0 +1,20 @@
+// cmake/Version.hpp.in
+//
+// This file is processed by CMake's configure_file() and the result is placed
+// under ${PROJECT_BINARY_DIR}/include/CMakeSandbox/version.hpp.
+// It exposes the project version defined in the top-level CMakeLists.txt.
+
+#pragma once
+
+#include <string_view>
+
+namespace CMakeSandbox {
+
+inline constexpr int         version_major = @PROJECT_VERSION_MAJOR@;
+inline constexpr int         version_minor = @PROJECT_VERSION_MINOR@;
+inline constexpr int         version_patch = @PROJECT_VERSION_PATCH@;
+inline constexpr std::string_view version_string = "@PROJECT_VERSION@";
+inline constexpr std::string_view project_name   = "@PROJECT_NAME@";
+inline constexpr std::string_view project_description = "@PROJECT_DESCRIPTION@";
+
+} // namespace CMakeSandbox

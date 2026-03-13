@@ -1,0 +1,43 @@
+# cmake/CMakeSandboxConfig.cmake.in
+#
+# Template used by configure_package_config_file() to produce the package
+# config file that downstream projects use via find_package(CMakeSandbox).
+#
+# @PACKAGE_INIT@ is replaced by CMake-generated boilerplate.
+
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/CMakeSandboxTargets.cmake")
+
+# ---------------------------------------------------------------------------
+# Create hierarchical alias targets so consumers can use the same target
+# names whether they include via add_subdirectory() or find_package().
+#
+# Internal exported name           -> Public alias target
+# CMakeSandbox::sandbox_geo_shapes -> CMakeSandbox::geo::shapes
+# CMakeSandbox::sandbox_bio_animals-> CMakeSandbox::bio::animals
+# CMakeSandbox::sandbox_math       -> CMakeSandbox::math
+# CMakeSandbox::sandbox_geo        -> CMakeSandbox::geo
+# CMakeSandbox::sandbox_bio        -> CMakeSandbox::bio
+# CMakeSandbox::sandbox_version    -> CMakeSandbox::version
+# ---------------------------------------------------------------------------
+if(NOT TARGET CMakeSandbox::geo::shapes)
+    add_library(CMakeSandbox::geo::shapes  ALIAS CMakeSandbox::sandbox_geo_shapes)
+endif()
+if(NOT TARGET CMakeSandbox::bio::animals)
+    add_library(CMakeSandbox::bio::animals ALIAS CMakeSandbox::sandbox_bio_animals)
+endif()
+if(NOT TARGET CMakeSandbox::math)
+    add_library(CMakeSandbox::math         ALIAS CMakeSandbox::sandbox_math)
+endif()
+if(NOT TARGET CMakeSandbox::geo)
+    add_library(CMakeSandbox::geo          ALIAS CMakeSandbox::sandbox_geo)
+endif()
+if(NOT TARGET CMakeSandbox::bio)
+    add_library(CMakeSandbox::bio          ALIAS CMakeSandbox::sandbox_bio)
+endif()
+if(NOT TARGET CMakeSandbox::version)
+    add_library(CMakeSandbox::version      ALIAS CMakeSandbox::sandbox_version)
+endif()
+
+check_required_components(CMakeSandbox)
