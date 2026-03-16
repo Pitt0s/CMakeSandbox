@@ -32,7 +32,7 @@ target_include_directories(sandbox_bio_animals
         $<INSTALL_INTERFACE:include>
 )
 
-cmsb_set_compiler_options(sandbox_bio_animals)
+target_link_libraries(sandbox_bio_animals PRIVATE CMakeSandbox::compiler_flags)
 
 # ============================================================================
 # Install

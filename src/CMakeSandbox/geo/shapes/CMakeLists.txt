@@ -36,7 +36,7 @@ target_include_directories(sandbox_geo_shapes
 )
 
 # Apply private compiler warnings / optimisation flags.
-cmsb_set_compiler_options(sandbox_geo_shapes)
+target_link_libraries(sandbox_geo_shapes PRIVATE CMakeSandbox::compiler_flags)
 
 # ============================================================================
 # Install

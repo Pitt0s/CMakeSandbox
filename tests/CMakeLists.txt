@@ -10,8 +10,7 @@ include(GNUInstallDirs)
 # ============================================================================
 macro(cmsb_add_test name)
     add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} PRIVATE ${ARGN})
-    cmsb_set_compiler_options(${name})
+    target_link_libraries(${name} PRIVATE ${ARGN} CMakeSandbox::compiler_flags)
     add_test(NAME ${name} COMMAND ${name})
 endmacro()
 

@@ -14,8 +14,8 @@ target_link_libraries(shapes_demo PRIVATE
     CMakeSandbox::geo::shapes
     CMakeSandbox::math
     CMakeSandbox::version
+    CMakeSandbox::compiler_flags
 )
-cmsb_set_compiler_options(shapes_demo)
 
 install(TARGETS shapes_demo RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
@@ -26,8 +26,8 @@ add_executable(animals_demo animals_demo.cpp)
 target_link_libraries(animals_demo PRIVATE
     CMakeSandbox::bio::animals
     CMakeSandbox::version
+    CMakeSandbox::compiler_flags
 )
-cmsb_set_compiler_options(animals_demo)
 
 install(TARGETS animals_demo RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
@@ -38,7 +38,7 @@ add_executable(math_demo math_demo.cpp)
 target_link_libraries(math_demo PRIVATE
     CMakeSandbox::math
     CMakeSandbox::version
+    CMakeSandbox::compiler_flags
 )
-cmsb_set_compiler_options(math_demo)
 
 install(TARGETS math_demo RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
