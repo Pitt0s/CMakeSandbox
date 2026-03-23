@@ -4,7 +4,7 @@ project(CMakeSandbox
     VERSION 0.1.0
     DESCRIPTION "CMake Sandbox for PFL with Separate Header Placement (C++20)"
     HOMEPAGE_URL "https://github.com/Pitt0s/CMakeSandbox"
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 # ============================================================================
