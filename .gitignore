@@ -1,0 +1,39 @@
+# Build directories
+build/
+build-*/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Testing/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compiled output
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# Generated headers
+include/CMakeSandbox/version.hpp
+
+# Package / install artifacts
+_install/
+_package/
+
+# Clang tools
+.cache/
+compile_commands.json

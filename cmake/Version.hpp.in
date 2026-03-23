@@ -1,0 +1,51 @@
+// cmake/Version.hpp.in
+//
+// This file is processed by CMake's configure_file() and the result is placed
+// under ${PROJECT_BINARY_DIR}/include/CMakeSandbox/version.hpp.
+// It exposes the project version and build metadata defined in the top-level
+// CMakeLists.txt at configure time.
+//
+// Note: compiler *flag* details (e.g. -Wall, -O3) are encoded in the
+// CMakeSandbox::compiler_flags INTERFACE target (cmake/CompilerOptions.cmake)
+// and are applied at compile time, not captured here.  What is captured here
+// is the CMake-level metadata known at configure time: compiler identity,
+// version, build type and any base flags set via CMAKE_CXX_FLAGS.
+
+#pragma once
+
+#include <string_view>
+
+namespace CMakeSandbox {
+
+// ── Project version ─────────────────────────────────────────────────────────
+inline constexpr int              version_major      = @PROJECT_VERSION_MAJOR@;
+inline constexpr int              version_minor      = @PROJECT_VERSION_MINOR@;
+inline constexpr int              version_patch      = @PROJECT_VERSION_PATCH@;
+inline constexpr std::string_view version_string     = "@PROJECT_VERSION@";
+inline constexpr std::string_view project_name       = "@PROJECT_NAME@";
+inline constexpr std::string_view project_description = "@PROJECT_DESCRIPTION@";
+
+// ── Build metadata ───────────────────────────────────────────────────────────
+// All values are filled in by CMake's configure_file() at configure time.
+namespace build_info {
+
+/// Compiler family used to build this library, e.g. "GNU", "Clang", "MSVC".
+inline constexpr std::string_view compiler_id      = "@CMAKE_CXX_COMPILER_ID@";
+
+/// Full compiler version string, e.g. "13.3.0" or "18.1.3".
+inline constexpr std::string_view compiler_version = "@CMAKE_CXX_COMPILER_VERSION@";
+
+/// CMake build type, e.g. "Debug", "Release", "RelWithDebInfo".
+/// Empty string when using a multi-config generator (Visual Studio, Xcode).
+inline constexpr std::string_view build_type       = "@CMAKE_BUILD_TYPE@";
+
+/// C++ language standard number, e.g. 20.
+inline constexpr int              cxx_standard     = @CMAKE_CXX_STANDARD@;
+
+/// Base CXX flags from CMAKE_CXX_FLAGS (user / toolchain overrides).
+/// Project-internal flags (-Wall, -O3, …) live in the compiler_flags target.
+inline constexpr std::string_view cxx_flags        = "@CMAKE_CXX_FLAGS@";
+
+} // namespace build_info
+
+} // namespace CMakeSandbox
