@@ -21,6 +21,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# This project uses only traditional #include-based headers; no C++20 named
+# modules (import/export module) are present.  Disabling module scanning avoids
+# invoking clang-scan-deps, which on some toolchains (Homebrew LLVM on macOS,
+# custom LLVM installs without a configured sysroot) fails to locate system
+# headers and aborts the build before any source is compiled.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 # Export compile commands for IDEs / clang-based tooling
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
