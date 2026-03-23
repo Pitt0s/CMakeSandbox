@@ -21,6 +21,7 @@ option(CMSB_ENABLE_CLANG_TIDY "Enable clang-tidy analysis" OFF)
 #   -DBUILD_SHARED_LIBS=ON  → shared (.so/.dylib/.dll)  [default]
 #   -DBUILD_SHARED_LIBS=OFF → static (.a/.lib)
 option(BUILD_SHARED_LIBS "Build shared libraries (OFF = static)" ON)
+mark_as_advanced(BUILD_SHARD_LIBS)
 
 # ============================================================================
 # Global C++ standard settings  (no per-target duplication needed)
