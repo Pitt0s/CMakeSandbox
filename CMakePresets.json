@@ -83,6 +83,39 @@
       "cacheVariables": {
         "CMSB_ENABLE_CLANG_TIDY": "ON"
       }
+    },
+
+    {
+      "name": "gcc-debug-static",
+      "displayName": "GCC – Debug (static)",
+      "inherits": "gcc-debug",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
+      "name": "gcc-release-static",
+      "displayName": "GCC – Release (static)",
+      "inherits": "gcc-release",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
+      "name": "clang-debug-static",
+      "displayName": "Clang – Debug (static)",
+      "inherits": "clang-debug",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
+      "name": "clang-release-static",
+      "displayName": "Clang – Release (static)",
+      "inherits": "clang-release",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
     }
   ],
 
@@ -93,7 +126,11 @@
     { "name": "clang-debug",        "configurePreset": "clang-debug"        },
     { "name": "clang-release",      "configurePreset": "clang-release"      },
     { "name": "clang-relwithdebinfo","configurePreset": "clang-relwithdebinfo" },
-    { "name": "clang-tidy",         "configurePreset": "clang-tidy"         }
+    { "name": "clang-tidy",         "configurePreset": "clang-tidy"         },
+    { "name": "gcc-debug-static",   "configurePreset": "gcc-debug-static"   },
+    { "name": "gcc-release-static", "configurePreset": "gcc-release-static" },
+    { "name": "clang-debug-static", "configurePreset": "clang-debug-static" },
+    { "name": "clang-release-static","configurePreset": "clang-release-static" }
   ],
 
   "testPresets": [
@@ -115,6 +152,26 @@
     {
       "name": "clang-release",
       "configurePreset": "clang-release",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "gcc-debug-static",
+      "configurePreset": "gcc-debug-static",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "gcc-release-static",
+      "configurePreset": "gcc-release-static",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "clang-debug-static",
+      "configurePreset": "clang-debug-static",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "clang-release-static",
+      "configurePreset": "clang-release-static",
       "output": { "outputOnFailure": true }
     }
   ],
@@ -154,6 +211,42 @@
         { "type": "configure", "name": "clang-release" },
         { "type": "build",     "name": "clang-release" },
         { "type": "test",      "name": "clang-release" }
+      ]
+    },
+    {
+      "name": "gcc-debug-static",
+      "displayName": "GCC Debug Static – configure → build → test",
+      "steps": [
+        { "type": "configure", "name": "gcc-debug-static" },
+        { "type": "build",     "name": "gcc-debug-static" },
+        { "type": "test",      "name": "gcc-debug-static" }
+      ]
+    },
+    {
+      "name": "gcc-release-static",
+      "displayName": "GCC Release Static – configure → build → test",
+      "steps": [
+        { "type": "configure", "name": "gcc-release-static" },
+        { "type": "build",     "name": "gcc-release-static" },
+        { "type": "test",      "name": "gcc-release-static" }
+      ]
+    },
+    {
+      "name": "clang-debug-static",
+      "displayName": "Clang Debug Static – configure → build → test",
+      "steps": [
+        { "type": "configure", "name": "clang-debug-static" },
+        { "type": "build",     "name": "clang-debug-static" },
+        { "type": "test",      "name": "clang-debug-static" }
+      ]
+    },
+    {
+      "name": "clang-release-static",
+      "displayName": "Clang Release Static – configure → build → test",
+      "steps": [
+        { "type": "configure", "name": "clang-release-static" },
+        { "type": "build",     "name": "clang-release-static" },
+        { "type": "test",      "name": "clang-release-static" }
       ]
     }
   ]
