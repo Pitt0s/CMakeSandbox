@@ -1,6 +1,9 @@
 # CMakeSandbox
 
-A sandbox repository for exploring [The Pitchfork Layout (PFL)](https://joholl.github.io/pitchfork-website/) with **Separate Header Placement** for a modern C++20 / CMake 3.28+ project.
+**Version 0.1.0** · C++20 · CMake 3.28
+<!-- When cutting a new release, update the version badge above and the GIT_TAG references in the FetchContent examples below. -->
+
+A sandbox repository for exploring [The Pitchfork Layout (PFL)](https://joholl.github.io/pitchfork-website/) with **Separate Header Placement** for a modern C++20 / CMake 3.28 project.
 
 The primary goal is to prove out the CMake patterns needed before applying them to a large HPC C++ framework refactoring:
 - Hierarchical library targets (`CMakeSandbox::geo::shapes`, …)
@@ -99,7 +102,7 @@ CMakeSandbox/
 
 ### Prerequisites
 
-- CMake ≥ 3.28
+- CMake 3.28 (minimum required; see [CMake version note](#cmake-version-note) below)
 - A C++20 compiler (GCC 13+ or Clang 16+)
 - Ninja (optional but used by the presets)
 
@@ -152,16 +155,91 @@ find_package(CMakeSandbox REQUIRED)
 target_link_libraries(my_app PRIVATE CMakeSandbox::geo::shapes)
 ```
 
-### Via `FetchContent()`
+### Via `FetchContent` – user guide
+
+`FetchContent` lets you pull CMakeSandbox directly from GitHub without a prior
+install step. This section shows a complete, production-ready setup.
+
+#### Minimal example
 
 ```cmake
+cmake_minimum_required(VERSION 3.28)
+project(MyApp)
+
 include(FetchContent)
 FetchContent_Declare(CMakeSandbox
     GIT_REPOSITORY https://github.com/Pitt0s/CMakeSandbox.git
-    GIT_TAG        main
+    GIT_TAG        v0.1.0          # pin to a release tag, not "main"
+    GIT_SHALLOW    TRUE            # fetch only the tagged commit
 )
 FetchContent_MakeAvailable(CMakeSandbox)
+
+add_executable(my_app main.cpp)
 target_link_libraries(my_app PRIVATE CMakeSandbox::geo::shapes)
+```
+
+#### Disabling unneeded build artifacts
+
+When CMakeSandbox is consumed as a library you almost certainly do not want
+its demo apps or its test suite to be compiled inside your project. Disable
+them via cache variables *before* calling `FetchContent_MakeAvailable`:
+
+```cmake
+set(CMSB_BUILD_APPS  OFF CACHE BOOL "" FORCE)
+set(CMSB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(CMakeSandbox)
+```
+
+#### Choosing shared vs. static linkage
+
+CMakeSandbox honours the standard `BUILD_SHARED_LIBS` CMake variable.
+
+```cmake
+# CMakeSandbox defaults BUILD_SHARED_LIBS to ON; override here for static
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(CMakeSandbox)
+```
+
+#### Available targets after `FetchContent_MakeAvailable`
+
+| Target                          | Type        | What it provides                              |
+|---------------------------------|-------------|-----------------------------------------------|
+| `CMakeSandbox::geo::shapes`     | SHARED lib  | `Circle`, `Rectangle`, `Triangle` + concepts  |
+| `CMakeSandbox::geo`             | INTERFACE   | Umbrella – links all geo targets               |
+| `CMakeSandbox::bio::animals`    | SHARED lib  | `Dog`, `Cat`, `Bird`                          |
+| `CMakeSandbox::bio`             | INTERFACE   | Umbrella – links all bio targets               |
+| `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     |
+| `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       |
+
+#### Full consumer `CMakeLists.txt`
+
+```cmake
+cmake_minimum_required(VERSION 3.28)
+project(MyConsumerApp LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(FetchContent)
+
+# ── Fetch CMakeSandbox ────────────────────────────────────────────────────────
+set(CMSB_BUILD_APPS  OFF CACHE BOOL "" FORCE)
+set(CMSB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS ON  CACHE BOOL "" FORCE)   # or OFF for static
+
+FetchContent_Declare(CMakeSandbox
+    GIT_REPOSITORY https://github.com/Pitt0s/CMakeSandbox.git
+    GIT_TAG        v0.1.0
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(CMakeSandbox)
+
+# ── Your application ──────────────────────────────────────────────────────────
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE
+    CMakeSandbox::geo::shapes   # geometric primitives
+    CMakeSandbox::math          # header-only math utilities
+)
 ```
 
 ---
@@ -202,6 +280,118 @@ CMakeSandbox::math::Vec2Dd a{3.0, 0.0}, b{0.0, 4.0};
 std::cout << "dot  = " << a.dot(b)   << '\n';   // 0
 std::cout << "len  = " << a.length() << '\n';   // 3
 ```
+
+---
+
+## Migrating a large existing project to this structure
+
+The patterns proven in this sandbox are intentionally simple so they can be
+lifted into a large, pre-existing C++ project that is being refactored to PFL.
+The key insight is **incremental migration**: you do not need to move everything
+at once.
+
+### Step 1 – Introduce the directory skeleton alongside the old layout
+
+Create the `include/`, `src/`, `apps/`, `tests/` and `cmake/` directories next
+to the existing source tree.  Keep the old build system working during the
+migration so the project stays green on CI.
+
+```
+myproject/
+├── old_src/        ← untouched for now
+├── include/        ← new PFL public headers go here
+├── src/            ← new PFL compiled sources go here
+└── cmake/          ← CompilerOptions.cmake, config template, …
+```
+
+### Step 2 – Pick one subsystem and migrate it first
+
+Choose the smallest, most self-contained subsystem (a utility library, a math
+module, etc.) and move its headers into `include/<Project>/<subsystem>/` and
+its `.cpp` files into `src/<Project>/<subsystem>/`.  Write a new
+`CMakeLists.txt` for it following this sandbox's pattern:
+
+```cmake
+add_library(myproject_math)
+add_library(MyProject::math ALIAS myproject_math)
+
+target_sources(myproject_math PRIVATE vec2d.cpp)
+target_include_directories(myproject_math
+    PUBLIC  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(myproject_math
+    PRIVATE MyProject::compiler_flags
+)
+```
+
+### Step 3 – Create INTERFACE umbrella targets immediately
+
+Even when only one subsystem has been migrated, create the umbrella
+`MyProject::math`, `MyProject::geo`, … targets.  Consumers in the old part of
+the codebase can start linking against `MyProject::math` without knowing the
+internal target names, making future splits invisible to them.
+
+### Step 4 – Replace old `#include` paths incrementally
+
+Update `#include` directives one translation unit at a time to use the new
+`include/<Project>/…` paths.  A CI step that compiles both the old and new
+targets in parallel catches regressions early.
+
+### Step 5 – Move remaining subsystems
+
+Repeat Step 2–4 for each subsystem.  Use `FetchContent_Declare` with
+`SOURCE_DIR` pointing to a local checkout to test integration with downstream
+projects before publishing a release:
+
+```cmake
+FetchContent_Declare(MyProject
+    SOURCE_DIR /path/to/myproject   # local checkout during migration
+)
+```
+
+### Tips for large HPC frameworks
+
+- **Keep one `cmake/CompilerOptions.cmake`** that is the single source of truth
+  for warning and optimisation flags.  Never sprinkle `target_compile_options`
+  calls across leaf `CMakeLists.txt` files.
+- **Use `PRIVATE` linkage for implementation details.**  If a library `A` uses
+  `Boost.Filesystem` internally but exposes none of it in its public API, link
+  Boost `PRIVATE`.  This prevents accidental transitive linkage in downstream
+  targets.
+- **Generate a `Version.hpp`** early (see `cmake/Version.hpp.in` in this
+  sandbox).  It gives every component a single, CMake-driven source of version
+  truth and is trivial to extend with build metadata.
+- **Add `CMakePresets.json`** from the start.  Presets capture the full
+  configure/build/test matrix (compilers, build types, static vs. shared) and
+  make CI pipelines reproducible on developer workstations.
+- **Pin external dependencies** in `FetchContent_Declare` to a commit SHA or
+  release tag, never to `main`/`master`, to keep builds reproducible across
+  machines and over time.
+- **Validate the install tree** with a separate `find_package` smoke-test
+  project in CI.  This catches missing `install()` rules far earlier than a
+  downstream consumer would.
+
+---
+
+## CMake version note
+
+The minimum required version is **3.28**.  This is the lowest version that
+provides all features used in this project:
+
+| Feature | Minimum CMake version |
+|---|---|
+| `cmake_minimum_required` / `project()` basics | 2.6 |
+| `GNUInstallDirs`, `CMakePackageConfigHelpers` | 3.0 |
+| Generator expressions (`$<CXX_COMPILER_ID:…>`) | 3.0 |
+| `write_basic_package_version_file` | 3.14 |
+| CMakePresets.json schema version 6 | 3.25 |
+| `CMAKE_CXX_SCAN_FOR_MODULES` | **3.28** |
+
+Reducing below 3.28 would require removing or replacing `CMAKE_CXX_SCAN_FOR_MODULES`,
+which is used to explicitly disable C++20 named-module scanning on toolchains
+where `clang-scan-deps` is not fully configured (e.g., Homebrew LLVM on macOS).
 
 ---
 
