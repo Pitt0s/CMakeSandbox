@@ -1,8 +1,8 @@
 # cmake/CompilerOptions.cmake
 #
 # Defines the INTERFACE library `sandbox_compiler_flags` (aliased as
-# `CMakeSandbox::compiler_flags`) that carries all project-internal warning
-# and optimisation flags.
+# `CMakeSandbox::compiler_flags`) that carries all project-internal warning,
+# optimisation, and platform-portability flags.
 #
 # Usage in library / executable CMakeLists:
 #   target_link_libraries(<target> PRIVATE CMakeSandbox::compiler_flags)
@@ -12,9 +12,21 @@
 # <target>'s own compilation but never propagate to consumers.  This is how
 # we enforce "no -Wall leak into downstream projects" with a single, reusable
 # target instead of a function call on every target.
+#
+# Threads::Threads is included here so that every target gets correct pthread
+# linkage on all platforms.  Clang (especially with lld or on systems where
+# libpthread is not auto-linked) requires the flag to be stated explicitly;
+# GCC and MSVC accept it silently.  find_package(Threads) is the canonical
+# CMake abstraction: it expands to -pthread on POSIX, nothing extra on MSVC,
+# and handles macOS / Windows transparently.
+
+find_package(Threads REQUIRED)
 
 add_library(sandbox_compiler_flags INTERFACE)
 add_library(CMakeSandbox::compiler_flags ALIAS sandbox_compiler_flags)
+
+# Propagate pthread / threading support to every target that links this library.
+target_link_libraries(sandbox_compiler_flags INTERFACE Threads::Threads)
 
 target_compile_options(sandbox_compiler_flags INTERFACE
     # ---- GCC -------------------------------------------------------
