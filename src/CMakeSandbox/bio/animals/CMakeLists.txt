@@ -26,12 +26,6 @@ target_sources(sandbox_bio_animals
             "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/bio/animals/bird.hpp"
 )
 
-target_include_directories(sandbox_bio_animals
-    PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-
 target_link_libraries(sandbox_bio_animals PRIVATE CMakeSandbox::compiler_flags)
 
 # ============================================================================
