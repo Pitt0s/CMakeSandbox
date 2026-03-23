@@ -11,6 +11,8 @@ add_library(CMakeSandbox::geo::shapes ALIAS sandbox_geo_shapes)
 
 # Sources + public headers declared together via FILE_SET (CMake >= 3.23).
 # BASE_DIRS controls the include root exposed to consumers.
+# Note: FILE_SET BASE_DIRS automatically sets INTERFACE_INCLUDE_DIRECTORIES —
+# target_include_directories() is not needed.
 target_sources(sandbox_geo_shapes
     PRIVATE
         circle.cpp
@@ -26,13 +28,6 @@ target_sources(sandbox_geo_shapes
             "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/geo/shapes/circle.hpp"
             "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/geo/shapes/rectangle.hpp"
             "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/geo/shapes/triangle.hpp"
-)
-
-# Include directories: consumers get the installed path after install().
-target_include_directories(sandbox_geo_shapes
-    PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
 )
 
 # Apply private compiler warnings / optimisation flags.

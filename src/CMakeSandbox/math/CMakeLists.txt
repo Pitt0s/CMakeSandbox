@@ -6,6 +6,12 @@
 # Because math/ is header-only there are no compiled translation units here.
 # We use an INTERFACE target and declare the headers via a FILE_SET so that
 # cmake --install correctly copies them and they appear in the export set.
+#
+# Note: no target_include_directories() needed.  FILE_SET BASE_DIRS
+# automatically populates INTERFACE_INCLUDE_DIRECTORIES for both the build
+# interface (${PROJECT_SOURCE_DIR}/include) and the install interface
+# (derived from the FILE_SET DESTINATION given in install(TARGETS ...)).
+# Consumers therefore write: #include <CMakeSandbox/math/vec2d.hpp>
 
 # ============================================================================
 # Target definition
@@ -21,12 +27,6 @@ target_sources(sandbox_math
         FILES
             "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/math/vec2d.hpp"
             "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/math/algorithms.hpp"
-)
-
-target_include_directories(sandbox_math
-    INTERFACE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
 )
 
 # math::algorithms uses geo::shapes concepts
