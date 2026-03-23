@@ -1,12 +1,18 @@
 # src/CMakeSandbox/bio/animals/CMakeLists.txt
 #
-# Defines the sandbox_bio_animals SHARED library target.
+# Defines the sandbox_bio_animals library target.
 # ALIAS: CMakeSandbox::bio::animals
+#
+# The library type (SHARED or STATIC) is controlled by the standard CMake
+# variable BUILD_SHARED_LIBS (default: ON → shared).  Callers using
+# FetchContent or the install can override it before including this project:
+#   set(BUILD_SHARED_LIBS OFF)   # → static
+#   FetchContent_MakeAvailable(CMakeSandbox)
 
 # ============================================================================
 # Target definition
 # ============================================================================
-add_library(sandbox_bio_animals SHARED)
+add_library(sandbox_bio_animals)
 add_library(CMakeSandbox::bio::animals ALIAS sandbox_bio_animals)
 
 target_sources(sandbox_bio_animals

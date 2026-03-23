@@ -14,6 +14,14 @@ option(CMSB_BUILD_APPS   "Build example applications" ON)
 option(CMSB_BUILD_TESTS  "Build tests"                 ON)
 option(CMSB_ENABLE_CLANG_TIDY "Enable clang-tidy analysis" OFF)
 
+# BUILD_SHARED_LIBS is a standard CMake variable that controls whether
+# add_library() without an explicit STATIC/SHARED keyword produces a shared
+# or a static library.  Exposing it here lets callers (FetchContent, CLI,
+# presets) choose the linkage type they need:
+#   -DBUILD_SHARED_LIBS=ON  → shared (.so/.dylib/.dll)  [default]
+#   -DBUILD_SHARED_LIBS=OFF → static (.a/.lib)
+option(BUILD_SHARED_LIBS "Build shared libraries (OFF = static)" ON)
+
 # ============================================================================
 # Global C++ standard settings  (no per-target duplication needed)
 # ============================================================================

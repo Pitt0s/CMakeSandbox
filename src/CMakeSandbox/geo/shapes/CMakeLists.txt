@@ -1,12 +1,18 @@
 # src/CMakeSandbox/geo/shapes/CMakeLists.txt
 #
-# Defines the sandbox_geo_shapes SHARED library target and installs it.
+# Defines the sandbox_geo_shapes library target and installs it.
 # The ALIAS target CMakeSandbox::geo::shapes is used by consumers.
+#
+# The library type (SHARED or STATIC) is controlled by the standard CMake
+# variable BUILD_SHARED_LIBS (default: ON → shared).  Callers using
+# FetchContent or the install can override it before including this project:
+#   set(BUILD_SHARED_LIBS OFF)   # → static
+#   FetchContent_MakeAvailable(CMakeSandbox)
 
 # ============================================================================
 # Target definition
 # ============================================================================
-add_library(sandbox_geo_shapes SHARED)
+add_library(sandbox_geo_shapes)
 add_library(CMakeSandbox::geo::shapes ALIAS sandbox_geo_shapes)
 
 # Sources + public headers declared together via FILE_SET (CMake >= 3.23).

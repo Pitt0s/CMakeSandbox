@@ -68,3 +68,13 @@ target_compile_options(sandbox_compiler_flags INTERFACE
         >
     >
 )
+
+# Export sandbox_compiler_flags so it is available in the install tree.
+# Static library targets that link it PRIVATELY require it to be part of the
+# same export set; INTERFACE targets with only compile options are harmless to
+# export (their properties don't propagate to end consumers).
+include(GNUInstallDirs)
+install(
+    TARGETS sandbox_compiler_flags
+    EXPORT  CMakeSandboxTargets
+)
