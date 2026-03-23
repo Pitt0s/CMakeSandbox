@@ -31,7 +31,7 @@ Testing/
 include/CMakeSandbox/version.hpp
 
 # Package / install artifacts
-_install/
+install/
 _package/
 
 # Clang tools

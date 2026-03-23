@@ -8,7 +8,7 @@
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "installDir": "${sourceDir}/_install/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
@@ -130,7 +130,16 @@
     { "name": "gcc-debug-static",   "configurePreset": "gcc-debug-static"   },
     { "name": "gcc-release-static", "configurePreset": "gcc-release-static" },
     { "name": "clang-debug-static", "configurePreset": "clang-debug-static" },
-    { "name": "clang-release-static","configurePreset": "clang-release-static" }
+    { "name": "clang-release-static","configurePreset": "clang-release-static" },
+
+    { "name": "gcc-debug-install",           "configurePreset": "gcc-debug",           "targets": ["install"] },
+    { "name": "gcc-release-install",         "configurePreset": "gcc-release",         "targets": ["install"] },
+    { "name": "clang-debug-install",         "configurePreset": "clang-debug",         "targets": ["install"] },
+    { "name": "clang-release-install",       "configurePreset": "clang-release",       "targets": ["install"] },
+    { "name": "gcc-debug-static-install",    "configurePreset": "gcc-debug-static",    "targets": ["install"] },
+    { "name": "gcc-release-static-install",  "configurePreset": "gcc-release-static",  "targets": ["install"] },
+    { "name": "clang-debug-static-install",  "configurePreset": "clang-debug-static",  "targets": ["install"] },
+    { "name": "clang-release-static-install","configurePreset": "clang-release-static","targets": ["install"] }
   ],
 
   "testPresets": [
@@ -179,74 +188,82 @@
   "workflowPresets": [
     {
       "name": "gcc-debug",
-      "displayName": "GCC Debug – configure → build → test",
+      "displayName": "GCC Debug – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "gcc-debug" },
         { "type": "build",     "name": "gcc-debug" },
-        { "type": "test",      "name": "gcc-debug" }
+        { "type": "test",      "name": "gcc-debug" },
+        { "type": "build",     "name": "gcc-debug-install" }
       ]
     },
     {
       "name": "gcc-release",
-      "displayName": "GCC Release – configure → build → test",
+      "displayName": "GCC Release – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "gcc-release" },
         { "type": "build",     "name": "gcc-release" },
-        { "type": "test",      "name": "gcc-release" }
+        { "type": "test",      "name": "gcc-release" },
+        { "type": "build",     "name": "gcc-release-install" }
       ]
     },
     {
       "name": "clang-debug",
-      "displayName": "Clang Debug – configure → build → test",
+      "displayName": "Clang Debug – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "clang-debug" },
         { "type": "build",     "name": "clang-debug" },
-        { "type": "test",      "name": "clang-debug" }
+        { "type": "test",      "name": "clang-debug" },
+        { "type": "build",     "name": "clang-debug-install" }
       ]
     },
     {
       "name": "clang-release",
-      "displayName": "Clang Release – configure → build → test",
+      "displayName": "Clang Release – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "clang-release" },
         { "type": "build",     "name": "clang-release" },
-        { "type": "test",      "name": "clang-release" }
+        { "type": "test",      "name": "clang-release" },
+        { "type": "build",     "name": "clang-release-install" }
       ]
     },
     {
       "name": "gcc-debug-static",
-      "displayName": "GCC Debug Static – configure → build → test",
+      "displayName": "GCC Debug Static – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "gcc-debug-static" },
         { "type": "build",     "name": "gcc-debug-static" },
-        { "type": "test",      "name": "gcc-debug-static" }
+        { "type": "test",      "name": "gcc-debug-static" },
+        { "type": "build",     "name": "gcc-debug-static-install" }
       ]
     },
     {
       "name": "gcc-release-static",
-      "displayName": "GCC Release Static – configure → build → test",
+      "displayName": "GCC Release Static – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "gcc-release-static" },
         { "type": "build",     "name": "gcc-release-static" },
-        { "type": "test",      "name": "gcc-release-static" }
+        { "type": "test",      "name": "gcc-release-static" },
+        { "type": "build",     "name": "gcc-release-static-install" }
       ]
     },
     {
       "name": "clang-debug-static",
-      "displayName": "Clang Debug Static – configure → build → test",
+      "displayName": "Clang Debug Static – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "clang-debug-static" },
         { "type": "build",     "name": "clang-debug-static" },
-        { "type": "test",      "name": "clang-debug-static" }
+        { "type": "test",      "name": "clang-debug-static" },
+        { "type": "build",     "name": "clang-debug-static-install" }
       ]
     },
     {
       "name": "clang-release-static",
-      "displayName": "Clang Release Static – configure → build → test",
+      "displayName": "Clang Release Static – configure → build → test → install",
       "steps": [
         { "type": "configure", "name": "clang-release-static" },
         { "type": "build",     "name": "clang-release-static" },
-        { "type": "test",      "name": "clang-release-static" }
+        { "type": "test",      "name": "clang-release-static" },
+        { "type": "build",     "name": "clang-release-static-install" }
       ]
     }
   ]
