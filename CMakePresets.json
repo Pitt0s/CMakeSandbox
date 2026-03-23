@@ -46,33 +46,38 @@
     },
 
     {
-      "name": "clang-debug",
-      "displayName": "Clang – Debug",
+      "name": "clang-base",
+      "hidden": true,
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_C_COMPILER":   "clang",
         "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE":   "Debug"
+        "CMAKE_OSX_SYSROOT":  "macosx"
+      }
+    },
+
+    {
+      "name": "clang-debug",
+      "displayName": "Clang – Debug",
+      "inherits": "clang-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "clang-release",
       "displayName": "Clang – Release",
-      "inherits": "base",
+      "inherits": "clang-base",
       "cacheVariables": {
-        "CMAKE_C_COMPILER":   "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE":   "Release"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
       "name": "clang-relwithdebinfo",
       "displayName": "Clang – RelWithDebInfo",
-      "inherits": "base",
+      "inherits": "clang-base",
       "cacheVariables": {
-        "CMAKE_C_COMPILER":   "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE":   "RelWithDebInfo"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
 
