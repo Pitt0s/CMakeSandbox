@@ -15,6 +15,15 @@ option(CMSB_BUILD_TESTS  "Build tests"                 ON)
 option(CMSB_ENABLE_CLANG_TIDY "Enable clang-tidy analysis" OFF)
 
 # ============================================================================
+# Cross-platform shared-library suffix normalization
+# On macOS CMake defaults to .dylib; override it to .so for consistency with
+# Linux and other Unix-like systems.
+# ============================================================================
+if(APPLE)
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+endif()
+
+# ============================================================================
 # Global C++ standard settings  (no per-target duplication needed)
 # ============================================================================
 set(CMAKE_CXX_STANDARD 20)
