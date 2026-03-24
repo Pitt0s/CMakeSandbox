@@ -10,9 +10,10 @@ project(CMakeSandbox
 # ============================================================================
 # Options
 # ============================================================================
-option(CMSB_BUILD_APPS   "Build example applications" ON)
-option(CMSB_BUILD_TESTS  "Build tests"                 ON)
-option(CMSB_ENABLE_CLANG_TIDY "Enable clang-tidy analysis" OFF)
+option(CMSB_BUILD_APPS        "Build example applications"                          ON)
+option(CMSB_BUILD_TESTS       "Build tests"                                          ON)
+option(CMSB_BUILD_SMOKE_TEST  "Enable smoke tests for find_package and FetchContent integration" OFF)
+option(CMSB_ENABLE_CLANG_TIDY "Enable clang-tidy analysis"                          OFF)
 
 # BUILD_SHARED_LIBS is a standard CMake variable that controls whether
 # add_library() without an explicit STATIC/SHARED keyword produces a shared
