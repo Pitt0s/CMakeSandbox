@@ -1,7 +1,8 @@
-# cmake/smoke_test.cmake
+# tests/smoke/smoke_test.cmake
 #
 # Generic driver for the standalone smoke test project (tests/smoke/).
-# Invoked from CTest via add_test(... COMMAND cmake ... -P cmake/smoke_test.cmake).
+# Invoked from CTest via add_test(... COMMAND cmake ... -P tests/smoke/smoke_test.cmake).
+# This is a cmake -P script, not a CMake module — it is not include()d.
 #
 # Required variables (pass via -D on the command line):
 #   SMOKE_SOURCE_DIR  – absolute path to tests/smoke/
