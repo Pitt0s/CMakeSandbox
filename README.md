@@ -1,9 +1,9 @@
 # CMakeSandbox
 
-**Version 0.1.0** · C++20 · CMake 3.28
+**Version 0.1.0** · C++20 · CMake 3.26
 <!-- When cutting a new release, update the version badge above and the GIT_TAG references in the FetchContent examples below. -->
 
-A sandbox repository for exploring [The Pitchfork Layout (PFL)](https://joholl.github.io/pitchfork-website/) with **Separate Header Placement** for a modern C++20 / CMake 3.28 project.
+A sandbox repository for exploring [The Pitchfork Layout (PFL)](https://joholl.github.io/pitchfork-website/) with **Separate Header Placement** for a modern C++20 / CMake 3.26 project.
 
 The primary goal is to prove out the CMake patterns needed before applying them to a large HPC C++ framework refactoring:
 - Hierarchical library targets (`CMakeSandbox::geo::shapes`, …)
@@ -22,7 +22,7 @@ The primary goal is to prove out the CMake patterns needed before applying them 
 CMakeSandbox/
 ├── .gitignore
 ├── .clang-tidy                 # clang-tidy configuration
-├── CMakeLists.txt              # Top-level project (CMake 3.28, C++20)
+├── CMakeLists.txt              # Top-level project (CMake 3.26, C++20)
 ├── CMakePresets.json           # Configure / build / test / workflow presets
 ├── LICENSE.md
 ├── README.md
@@ -102,7 +102,7 @@ CMakeSandbox/
 
 ### Prerequisites
 
-- CMake 3.28 (minimum required; see [CMake version note](#cmake-version-note) below)
+- CMake 3.26 (minimum required; see [CMake version note](#cmake-version-note) below)
 - A C++20 compiler (GCC 13+ or Clang 16+)
 - Ninja (optional but used by the presets)
 
@@ -163,7 +163,7 @@ install step. This section shows a complete, production-ready setup.
 #### Minimal example
 
 ```cmake
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.26)
 project(MyApp)
 
 include(FetchContent)
@@ -214,7 +214,7 @@ FetchContent_MakeAvailable(CMakeSandbox)
 #### Full consumer `CMakeLists.txt`
 
 ```cmake
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.26)
 project(MyConsumerApp LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -377,8 +377,8 @@ FetchContent_Declare(MyProject
 
 ## CMake version note
 
-The minimum required version is **3.28**.  This is the lowest version that
-provides all features used in this project:
+The minimum required version is **3.26**.  This is the lowest version that
+provides all features used unconditionally in this project:
 
 | Feature | Minimum CMake version |
 |---|---|
@@ -387,11 +387,12 @@ provides all features used in this project:
 | Generator expressions (`$<CXX_COMPILER_ID:…>`) | 3.0 |
 | `write_basic_package_version_file` | 3.14 |
 | CMakePresets.json schema version 6 | 3.25 |
-| `CMAKE_CXX_SCAN_FOR_MODULES` | **3.28** |
+| `CMAKE_CXX_SCAN_FOR_MODULES` *(optional, guarded)* | 3.28 |
 
-Reducing below 3.28 would require removing or replacing `CMAKE_CXX_SCAN_FOR_MODULES`,
-which is used to explicitly disable C++20 named-module scanning on toolchains
-where `clang-scan-deps` is not fully configured (e.g., Homebrew LLVM on macOS).
+`CMAKE_CXX_SCAN_FOR_MODULES` is set only when running CMake 3.28 or later
+(guarded by a `CMAKE_VERSION VERSION_GREATER_EQUAL "3.28"` check).  On CMake
+3.26 and 3.27 this variable does not exist; named-module scanning is simply
+not enabled by those versions, so no guard is needed on the consumer side.
 
 ---
 
