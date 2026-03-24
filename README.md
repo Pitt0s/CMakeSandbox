@@ -315,12 +315,20 @@ its `.cpp` files into `src/<Project>/<subsystem>/`.  Write a new
 add_library(myproject_math)
 add_library(MyProject::math ALIAS myproject_math)
 
-target_sources(myproject_math PRIVATE vec2d.cpp)
-target_include_directories(myproject_math
-    PUBLIC  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+# Sources and public headers declared together via FILE_SET (CMake ≥ 3.23).
+# BASE_DIRS defines the include root; FILE_SET automatically populates
+# INTERFACE_INCLUDE_DIRECTORIES – no target_include_directories() call needed.
+target_sources(myproject_math
+    PRIVATE
+        vec2d.cpp
+    PUBLIC
+        FILE_SET myproject_math_headers
+        TYPE HEADERS
+        BASE_DIRS "${PROJECT_SOURCE_DIR}/include"
+        FILES
+            "${PROJECT_SOURCE_DIR}/include/MyProject/math/vec2d.hpp"
 )
+
 target_link_libraries(myproject_math
     PRIVATE MyProject::compiler_flags
 )
@@ -341,15 +349,37 @@ targets in parallel catches regressions early.
 
 ### Step 5 – Move remaining subsystems
 
-Repeat Step 2–4 for each subsystem.  Use `FetchContent_Declare` with
-`SOURCE_DIR` pointing to a local checkout to test integration with downstream
-projects before publishing a release:
+Repeat Step 2–4 for each subsystem.  Before publishing a release, verify
+downstream integration with `FetchContent_Declare` pointing `SOURCE_DIR` at
+your local checkout.  This exercises the full FetchContent path without
+needing a prior `cmake --install`:
 
 ```cmake
+cmake_minimum_required(VERSION 3.26)
+project(MyConsumerApp LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(FetchContent)
+
+# Disable the library's own apps and tests when consumed as a dependency.
+set(CMSB_BUILD_APPS  OFF CACHE BOOL "" FORCE)
+set(CMSB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
 FetchContent_Declare(MyProject
-    SOURCE_DIR /path/to/myproject   # local checkout during migration
+    SOURCE_DIR /path/to/myproject   # local checkout; replace with GIT_REPOSITORY for CI
 )
+FetchContent_MakeAvailable(MyProject)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE MyProject::math)
 ```
+
+The sandbox ships a ready-made consumer in `tests/smoke/` that demonstrates
+both the `FetchContent SOURCE_DIR` and `find_package` patterns and is wired
+into CI via the `smoke-gcc-debug` workflow preset (see
+[Validate the install tree](#validate-the-install-tree) below).
 
 ### Tips for large HPC frameworks
 
@@ -369,9 +399,26 @@ FetchContent_Declare(MyProject
 - **Pin external dependencies** in `FetchContent_Declare` to a commit SHA or
   release tag, never to `main`/`master`, to keep builds reproducible across
   machines and over time.
-- **Validate the install tree** with a separate `find_package` smoke-test
-  project in CI.  This catches missing `install()` rules far earlier than a
-  downstream consumer would.
+- <a name="validate-the-install-tree"></a>**Validate the install tree** with the `tests/smoke/` consumer project
+  included in this sandbox.  It can be driven in two ways:
+
+  ```bash
+  # 1. find_package mode – validates all install() rules are correct
+  cmake --workflow --preset smoke-gcc-debug
+
+  # 2. FetchContent SOURCE_DIR mode (manual, no prior install needed)
+  cmake -S tests/smoke -B build/smoke \
+        -DSMOKE_USE_FETCHCONTENT=ON \
+        -DCMSB_SOURCE_DIR=$(pwd)
+  cmake --build build/smoke
+  ctest --test-dir build/smoke --output-on-failure
+  ```
+
+  The `smoke-gcc-debug` workflow preset runs
+  **configure → build → install → smoke tests** in the correct order so both
+  `smoke_find_package` and `smoke_fetchcontent` CTest tests are exercised.
+  This catches missing `install()` rules, broken `CMakeSandboxConfig.cmake`
+  aliases, or missing headers far earlier than a downstream consumer would.
 
 ---
 

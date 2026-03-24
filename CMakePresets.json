@@ -116,6 +116,23 @@
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "OFF"
       }
+    },
+
+    {
+      "name": "gcc-debug-smoke",
+      "displayName": "GCC – Debug + smoke tests",
+      "inherits": "gcc-debug",
+      "cacheVariables": {
+        "CMSB_BUILD_SMOKE_TEST": "ON"
+      }
+    },
+    {
+      "name": "gcc-release-smoke",
+      "displayName": "GCC – Release + smoke tests",
+      "inherits": "gcc-release",
+      "cacheVariables": {
+        "CMSB_BUILD_SMOKE_TEST": "ON"
+      }
     }
   ],
 
@@ -139,7 +156,12 @@
     { "name": "gcc-debug-static-install",    "configurePreset": "gcc-debug-static",    "targets": ["install"] },
     { "name": "gcc-release-static-install",  "configurePreset": "gcc-release-static",  "targets": ["install"] },
     { "name": "clang-debug-static-install",  "configurePreset": "clang-debug-static",  "targets": ["install"] },
-    { "name": "clang-release-static-install","configurePreset": "clang-release-static","targets": ["install"] }
+    { "name": "clang-release-static-install","configurePreset": "clang-release-static","targets": ["install"] },
+
+    { "name": "gcc-debug-smoke",         "configurePreset": "gcc-debug-smoke"  },
+    { "name": "gcc-release-smoke",       "configurePreset": "gcc-release-smoke"},
+    { "name": "gcc-debug-smoke-install", "configurePreset": "gcc-debug-smoke",   "targets": ["install"] },
+    { "name": "gcc-release-smoke-install","configurePreset": "gcc-release-smoke","targets": ["install"] }
   ],
 
   "testPresets": [
@@ -181,6 +203,17 @@
     {
       "name": "clang-release-static",
       "configurePreset": "clang-release-static",
+      "output": { "outputOnFailure": true }
+    },
+
+    {
+      "name": "gcc-debug-smoke",
+      "configurePreset": "gcc-debug-smoke",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "gcc-release-smoke",
+      "configurePreset": "gcc-release-smoke",
       "output": { "outputOnFailure": true }
     }
   ],
@@ -264,6 +297,27 @@
         { "type": "build",     "name": "clang-release-static" },
         { "type": "test",      "name": "clang-release-static" },
         { "type": "build",     "name": "clang-release-static-install" }
+      ]
+    },
+
+    {
+      "name": "smoke-gcc-debug",
+      "displayName": "GCC Debug – configure → build → install → smoke tests",
+      "steps": [
+        { "type": "configure", "name": "gcc-debug-smoke"         },
+        { "type": "build",     "name": "gcc-debug-smoke"         },
+        { "type": "build",     "name": "gcc-debug-smoke-install" },
+        { "type": "test",      "name": "gcc-debug-smoke"         }
+      ]
+    },
+    {
+      "name": "smoke-gcc-release",
+      "displayName": "GCC Release – configure → build → install → smoke tests",
+      "steps": [
+        { "type": "configure", "name": "gcc-release-smoke"         },
+        { "type": "build",     "name": "gcc-release-smoke"         },
+        { "type": "build",     "name": "gcc-release-smoke-install" },
+        { "type": "test",      "name": "gcc-release-smoke"         }
       ]
     }
   ]
