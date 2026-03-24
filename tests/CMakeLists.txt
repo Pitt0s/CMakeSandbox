@@ -44,7 +44,7 @@ cmsb_add_test(test_version
 #       before ctest (handled automatically by the smoke-* workflow presets).
 if(CMSB_BUILD_SMOKE_TEST)
     set(_smoke_src  "${PROJECT_SOURCE_DIR}/tests/smoke")
-    set(_smoke_drv  "${PROJECT_SOURCE_DIR}/cmake/smoke_test.cmake")
+    set(_smoke_drv  "${PROJECT_SOURCE_DIR}/tests/smoke/smoke_test.cmake")
     set(_smoke_bdir "${CMAKE_CURRENT_BINARY_DIR}/smoke")
 
     # find_package variant: validates installed package config and headers

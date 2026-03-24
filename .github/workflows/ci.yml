@@ -1,0 +1,77 @@
+# .github/workflows/ci.yml
+#
+# Continuous integration for CMakeSandbox.
+#
+# Jobs:
+#   build   – configure, build, test, and install via cmake --workflow
+#   smoke   – install the library and verify the standalone consumer project
+#             in tests/smoke/ works via both find_package and FetchContent
+#
+# All jobs use CMakePresets.json so the same preset names work on developer
+# workstations and in CI.
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "copilot/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Unit tests ────────────────────────────────────────────────────────────────
+  build:
+    name: build / ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset:
+          - gcc-debug
+          - gcc-release
+          - clang-debug
+          - clang-release
+          - gcc-debug-static
+          - clang-debug-static
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y ninja-build
+
+      - name: Configure, build, test and install
+        # cmake --workflow runs: configure → build → unit tests → install
+        run: cmake --workflow --preset ${{ matrix.preset }}
+
+  # ── Smoke tests ───────────────────────────────────────────────────────────────
+  smoke:
+    name: smoke / ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset:
+          - smoke-gcc-debug
+          - smoke-gcc-release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y ninja-build
+
+      - name: Configure, build, install and smoke-test
+        # The smoke-* workflow presets run:
+        #   configure → build → install → smoke tests
+        # The install step runs before ctest so that smoke_find_package can
+        # locate the installed CMakeSandboxConfig.cmake.
+        run: cmake --workflow --preset ${{ matrix.preset }}

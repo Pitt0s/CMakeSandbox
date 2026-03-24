@@ -395,7 +395,9 @@ into CI via the `smoke-gcc-debug` workflow preset (see
   truth and is trivial to extend with build metadata.
 - **Add `CMakePresets.json`** from the start.  Presets capture the full
   configure/build/test matrix (compilers, build types, static vs. shared) and
-  make CI pipelines reproducible on developer workstations.
+  make CI pipelines reproducible on developer workstations.  The CI workflow in
+  `.github/workflows/ci.yml` runs every preset via `cmake --workflow` so the
+  same commands work locally and on GitHub Actions.
 - **Pin external dependencies** in `FetchContent_Declare` to a commit SHA or
   release tag, never to `main`/`master`, to keep builds reproducible across
   machines and over time.

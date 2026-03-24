@@ -13,7 +13,7 @@
 #              -DCMSB_SOURCE_DIR=<path-to-CMakeSandbox-root>
 #
 # Both modes compile the same main.cpp and register a CTest test.
-# The cmake/smoke_test.cmake driver script runs this project end-to-end.
+# The smoke_test.cmake driver script in this directory runs this project end-to-end.
 
 cmake_minimum_required(VERSION 3.26)
 project(CMakeSandboxSmokeTest LANGUAGES CXX)
