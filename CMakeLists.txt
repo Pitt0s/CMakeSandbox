@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.26)
 
 project(CMakeSandbox
     VERSION 0.1.0
@@ -31,11 +31,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # This project uses only traditional #include-based headers; no C++20 named
-# modules (import/export module) are present.  Disabling module scanning avoids
-# invoking clang-scan-deps, which on some toolchains (Homebrew LLVM on macOS,
-# custom LLVM installs without a configured sysroot) fails to locate system
-# headers and aborts the build before any source is compiled.
-set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+# modules (import/export module) are present.  On CMake 3.28+ we can explicitly
+# disable module scanning, which avoids invoking clang-scan-deps on toolchains
+# where it is not fully configured (e.g., Homebrew LLVM on macOS).
+# On CMake 3.26/3.27 this variable does not exist; module scanning is simply
+# not performed because those versions do not enable it by default.
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.28")
+    set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+endif()
 
 # Export compile commands for IDEs / clang-based tooling
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
