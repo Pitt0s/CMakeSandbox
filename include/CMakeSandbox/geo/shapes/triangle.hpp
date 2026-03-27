@@ -7,7 +7,7 @@
 namespace CMakeSandbox::geo::shapes {
 
 /// A triangle defined by its three side lengths (a, b, c).
-class Triangle final : public Shape {
+class CMSB_SUPPORTED Triangle final : public Shape {
 public:
     Triangle(double a, double b, double c);
 

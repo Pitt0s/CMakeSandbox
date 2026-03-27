@@ -34,6 +34,12 @@ target_sources(sandbox_bio_animals
 
 target_link_libraries(sandbox_bio_animals PRIVATE CMakeSandbox::compiler_flags)
 
+# The bio::animals classes are themselves marked CMSB_EXPERIMENTAL.
+# Add CMSB_ENABLE_EXPERIMENTAL privately so the library's own translation
+# units compile without spurious deprecated warnings when implementing the
+# experimental API (the warning is intended for downstream consumers only).
+target_compile_definitions(sandbox_bio_animals PRIVATE CMSB_ENABLE_EXPERIMENTAL)
+
 # ============================================================================
 # Install
 # ============================================================================

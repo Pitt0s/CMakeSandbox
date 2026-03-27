@@ -13,6 +13,7 @@ The primary goal is to prove out the CMake patterns needed before applying them 
 - CMake presets and workflows
 - `clang-tidy` integration
 - `Version.hpp` generated from a CMake template
+- **API-status tagging system** (`CMSB_SUPPORTED`, `CMSB_DEPRECATED`, `CMSB_EXPERIMENTAL`)
 
 ---
 
@@ -95,6 +96,77 @@ CMakeSandbox/
 | `CMakeSandbox::bio`             | INTERFACE   | Alias grouping all bio targets                |
 | `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     |
 | `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       |
+| `CMakeSandbox::api_status`      | INTERFACE   | `api_status.hpp` tagging macros               |
+
+---
+
+## API-status tagging system
+
+`include/CMakeSandbox/api_status.hpp` provides three macros that annotate the
+support status of public APIs.  Place each macro **after** the leading keyword
+(`class`, `struct`, `void`, …):
+
+```cpp
+#include "CMakeSandbox/api_status.hpp"
+
+class CMSB_SUPPORTED   Circle { … };   // stable, fully supported
+class CMSB_EXPERIMENTAL Animal { … };  // may change; opt-in required
+CMSB_DEPRECATED("Use print_shape_info() instead.") void print_info(…);
+```
+
+### Status levels
+
+| Macro | Meaning | Compiler effect |
+|---|---|---|
+| `CMSB_SUPPORTED` | Stable, fully-supported API | Expands to nothing (documentation annotation) |
+| `CMSB_EXPERIMENTAL` | May change without notice | Emits a `[[deprecated]]`-style warning at every use site |
+| `CMSB_DEPRECATED("reason")` | Scheduled for removal | Emits a `[[deprecated("reason")]]` warning at every use site |
+
+### Opting in to experimental APIs
+
+The recommended approach is to pass the preprocessor macro via your build
+system so it applies consistently across all translation units.
+
+**CMake (preferred for FetchContent consumers):**
+
+```cmake
+set(CMSB_ENABLE_EXPERIMENTAL ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(CMakeSandbox)
+target_link_libraries(my_app PRIVATE
+    CMakeSandbox::api_status        # propagates CMSB_ENABLE_EXPERIMENTAL
+    CMakeSandbox::bio::animals
+)
+```
+
+**Compiler flag:**
+
+```bash
+g++ -DCMSB_ENABLE_EXPERIMENTAL …
+```
+
+**Per-translation-unit `#define` (use only when the above are not available):**
+The macro must appear before the first CMakeSandbox header include in that file.
+
+```cpp
+#define CMSB_ENABLE_EXPERIMENTAL
+#include "CMakeSandbox/bio/animals/dog.hpp"
+```
+
+### Silencing deprecated warnings only
+
+```cpp
+#define CMSB_NO_DEPRECATED_WARNINGS
+#include "CMakeSandbox/math/algorithms.hpp"
+```
+
+### Current API-status map
+
+| Component | Status |
+|---|---|
+| `CMakeSandbox::geo::shapes` – `Circle`, `Rectangle`, `Triangle`, `Shape` | **Supported** |
+| `CMakeSandbox::math` – `Vec2D<T>`, `Numeric`, `max_area`, `total_area` | **Supported** |
+| `CMakeSandbox::bio::animals` – `Animal`, `Dog`, `Cat`, `Bird` | **Experimental** |
+| `CMakeSandbox::math::print_info` | **Deprecated** – use `print_shape_info()` |
 
 ---
 
@@ -210,6 +282,7 @@ FetchContent_MakeAvailable(CMakeSandbox)
 | `CMakeSandbox::bio`             | INTERFACE   | Umbrella – links all bio targets               |
 | `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     |
 | `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       |
+| `CMakeSandbox::api_status`      | INTERFACE   | `api_status.hpp` tagging macros               |
 
 #### Full consumer `CMakeLists.txt`
 

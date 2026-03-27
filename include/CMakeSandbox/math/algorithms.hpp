@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "CMakeSandbox/api_status.hpp"
 #include "CMakeSandbox/geo/shapes/concepts.hpp"
 
 #include <algorithm>
@@ -22,6 +23,13 @@ void print_shape_info(const S& shape) {
               << " | area = "      << shape.area()
               << " | perimeter = " << shape.perimeter()
               << '\n';
+}
+
+/// @deprecated Use print_shape_info() instead.
+template <CMakeSandbox::geo::shapes::Shape2D S>
+CMSB_DEPRECATED("Use print_shape_info() instead.")
+void print_info(const S& shape) {
+    print_shape_info(shape);
 }
 
 /// Return a reference to the shape with the largest area in [first, last).

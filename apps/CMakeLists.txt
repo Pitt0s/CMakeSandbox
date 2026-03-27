@@ -28,6 +28,8 @@ target_link_libraries(animals_demo PRIVATE
     CMakeSandbox::version
     CMakeSandbox::compiler_flags
 )
+# animals_demo intentionally uses the experimental bio::animals API.
+target_compile_definitions(animals_demo PRIVATE CMSB_ENABLE_EXPERIMENTAL)
 
 install(TARGETS animals_demo RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

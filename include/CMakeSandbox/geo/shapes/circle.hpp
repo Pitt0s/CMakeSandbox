@@ -6,7 +6,7 @@
 
 namespace CMakeSandbox::geo::shapes {
 
-class Circle final : public Shape {
+class CMSB_SUPPORTED Circle final : public Shape {
 public:
     explicit Circle(double radius);
 
