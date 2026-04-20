@@ -39,6 +39,9 @@ target_sources(sandbox_geo_shapes
 # Apply private compiler warnings / optimisation flags.
 target_link_libraries(sandbox_geo_shapes PRIVATE CMakeSandbox::compiler_flags)
 
+# Tag this target's API-support status.
+cmsb_set_target_status(sandbox_geo_shapes SUPPORTED)
+
 # ============================================================================
 # Install
 # ============================================================================

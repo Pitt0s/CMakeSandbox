@@ -32,6 +32,9 @@ target_sources(sandbox_math
 # math::algorithms uses geo::shapes concepts
 target_link_libraries(sandbox_math INTERFACE CMakeSandbox::geo::shapes)
 
+# Tag this target's API-support status.
+cmsb_set_target_status(sandbox_math SUPPORTED)
+
 # ============================================================================
 # Install
 # ============================================================================

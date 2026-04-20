@@ -1,60 +1,81 @@
 # cmake/ApiStatus.cmake
 #
-# API-status infrastructure for CMakeSandbox.
+# CMake-level API-status tagging for CMakeSandbox targets.
 #
-# Provides:
-#   sandbox_api_status  (alias CMakeSandbox::api_status) – an INTERFACE library
-#     that installs include/CMakeSandbox/api_status.hpp and, when
-#     CMSB_ENABLE_EXPERIMENTAL is ON, propagates the CMSB_ENABLE_EXPERIMENTAL
-#     preprocessor macro to all consumers of this target.
+# This module provides a single function, cmsb_set_target_status(), that
+# records an API-support classification on a CMake target and emits
+# appropriate diagnostics at configure time and at install time.
 #
-# CMake option:
-#   CMSB_ENABLE_EXPERIMENTAL  (default: OFF)
-#     When ON, every target that links CMakeSandbox::api_status receives the
-#     CMSB_ENABLE_EXPERIMENTAL compile definition, suppressing the
-#     [[deprecated]]-style diagnostic emitted by the CMSB_EXPERIMENTAL macro.
+# Usage (in a library's CMakeLists.txt, after the target is defined):
 #
-#     Downstream consumers that intentionally use experimental APIs can opt in
-#     via FetchContent:
+#   cmsb_set_target_status(sandbox_bio_animals EXPERIMENTAL)
+#   cmsb_set_target_status(sandbox_geo_shapes  SUPPORTED)
 #
-#       set(CMSB_ENABLE_EXPERIMENTAL ON CACHE BOOL "" FORCE)
-#       FetchContent_MakeAvailable(CMakeSandbox)
-#       target_link_libraries(my_app PRIVATE CMakeSandbox::api_status
-#                                            CMakeSandbox::bio::animals)
-#
-#     Or by passing -DCMSB_ENABLE_EXPERIMENTAL directly to the compiler.
+# Status values
+# ─────────────
+#   SUPPORTED   – stable, fully supported.  A STATUS message is emitted.
+#   EXPERIMENTAL – API or behaviour may change between releases without notice.
+#                  Emits a WARNING at configure time and at install time.
+#   DEPRECATED  – scheduled for removal in a future release.
+#                  Emits a WARNING at configure time and at install time.
 
-# ─── Option ──────────────────────────────────────────────────────────────────
-option(CMSB_ENABLE_EXPERIMENTAL
-    "Suppress deprecation warnings for experimental CMakeSandbox APIs"
-    OFF
+# ─── Custom target property ───────────────────────────────────────────────────
+# Registering the property makes it visible in cmake --build --target help,
+# IDE property inspectors, and cmake_print_properties() output.
+define_property(TARGET PROPERTY CMSB_API_STATUS
+    BRIEF_DOCS "API support status: SUPPORTED, EXPERIMENTAL, or DEPRECATED"
+    FULL_DOCS
+        "Set by cmsb_set_target_status(). "
+        "SUPPORTED:    stable and fully supported. "
+        "EXPERIMENTAL: API or behaviour may change without notice; "
+                      "avoid in production builds. "
+        "DEPRECATED:   will be removed in a future release."
 )
 
-# ─── INTERFACE target ─────────────────────────────────────────────────────────
-add_library(sandbox_api_status INTERFACE)
-add_library(CMakeSandbox::api_status ALIAS sandbox_api_status)
+# ─── cmsb_set_target_status(<target> <STATUS>) ────────────────────────────────
+#
+# Assigns an API-status tag to a CMake target.
+#   <target>  – any CMake target created with add_library() or add_executable()
+#   <STATUS>  – SUPPORTED | EXPERIMENTAL | DEPRECATED
+#
+# Effects:
+#   • Sets the CMSB_API_STATUS property on <target>.
+#   • SUPPORTED:    emits message(STATUS ...) at configure time.
+#   • EXPERIMENTAL: emits message(WARNING ...) at configure time and
+#                   install(CODE ...) warning at cmake --install time.
+#   • DEPRECATED:   same as EXPERIMENTAL but with a "will be removed" message.
+function(cmsb_set_target_status target status)
+    if(NOT status MATCHES "^(SUPPORTED|EXPERIMENTAL|DEPRECATED)$")
+        message(FATAL_ERROR
+            "cmsb_set_target_status(): STATUS must be one of "
+            "SUPPORTED, EXPERIMENTAL, or DEPRECATED (got '${status}')"
+        )
+    endif()
 
-target_sources(sandbox_api_status
-    INTERFACE
-        FILE_SET sandbox_api_status_headers
-        TYPE HEADERS
-        BASE_DIRS "${PROJECT_SOURCE_DIR}/include"
-        FILES
-            "${PROJECT_SOURCE_DIR}/include/CMakeSandbox/api_status.hpp"
-)
+    set_target_properties(${target} PROPERTIES CMSB_API_STATUS "${status}")
 
-if(CMSB_ENABLE_EXPERIMENTAL)
-    target_compile_definitions(sandbox_api_status INTERFACE
-        CMSB_ENABLE_EXPERIMENTAL
-    )
-endif()
-
-# ─── Install ─────────────────────────────────────────────────────────────────
-include(GNUInstallDirs)
-
-install(
-    TARGETS sandbox_api_status
-    EXPORT  CMakeSandboxTargets
-    FILE_SET sandbox_api_status_headers
-             DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-)
+    if(status STREQUAL "SUPPORTED")
+        message(STATUS
+            "[CMakeSandbox] Target '${target}': SUPPORTED"
+        )
+    elseif(status STREQUAL "EXPERIMENTAL")
+        message(WARNING
+            "[CMakeSandbox] Target '${target}' is EXPERIMENTAL – "
+            "its API and behaviour may change between releases without notice. "
+            "Do not rely on it in production builds."
+        )
+        install(CODE
+            "message(WARNING \"[CMakeSandbox] Installing EXPERIMENTAL target "
+            "'${target}'. Its API may change without notice.\")"
+        )
+    elseif(status STREQUAL "DEPRECATED")
+        message(WARNING
+            "[CMakeSandbox] Target '${target}' is DEPRECATED and will be "
+            "removed in a future release."
+        )
+        install(CODE
+            "message(WARNING \"[CMakeSandbox] Installing DEPRECATED target "
+            "'${target}'. It will be removed in a future release.\")"
+        )
+    endif()
+endfunction()

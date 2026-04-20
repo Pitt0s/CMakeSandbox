@@ -24,8 +24,6 @@ cmsb_add_test(test_shapes
 cmsb_add_test(test_animals
     CMakeSandbox::bio::animals
 )
-# test_animals intentionally uses the experimental bio::animals API.
-target_compile_definitions(test_animals PRIVATE CMSB_ENABLE_EXPERIMENTAL)
 
 cmsb_add_test(test_math
     CMakeSandbox::math

@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "CMakeSandbox/api_status.hpp"
-
 #include <concepts>
 #include <cmath>
 #include <ostream>
@@ -20,14 +18,14 @@ namespace CMakeSandbox::math {
 
 /// Numeric concept: any arithmetic type (int, float, double, …).
 template <typename T>
-concept CMSB_SUPPORTED Numeric = std::is_arithmetic_v<T>;
+concept Numeric = std::is_arithmetic_v<T>;
 
 // ---------------------------------------------------------------------------
 // Vec2D<T>
 // ---------------------------------------------------------------------------
 
 template <Numeric T>
-class CMSB_SUPPORTED Vec2D {
+class Vec2D {
 public:
     T x{};
     T y{};

@@ -13,7 +13,7 @@ The primary goal is to prove out the CMake patterns needed before applying them 
 - CMake presets and workflows
 - `clang-tidy` integration
 - `Version.hpp` generated from a CMake template
-- **API-status tagging system** (`CMSB_SUPPORTED`, `CMSB_DEPRECATED`, `CMSB_EXPERIMENTAL`)
+- **CMake-level API-status tagging** (`cmsb_set_target_status()`)
 
 ---
 
@@ -88,85 +88,64 @@ CMakeSandbox/
 
 ## CMake targets
 
-| CMake target                    | Type        | What it provides                              |
-|---------------------------------|-------------|-----------------------------------------------|
-| `CMakeSandbox::geo::shapes`     | SHARED lib  | `Circle`, `Rectangle`, `Triangle` + concepts  |
-| `CMakeSandbox::geo`             | INTERFACE   | Alias grouping all geo targets                |
-| `CMakeSandbox::bio::animals`    | SHARED lib  | `Dog`, `Cat`, `Bird`                          |
-| `CMakeSandbox::bio`             | INTERFACE   | Alias grouping all bio targets                |
-| `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     |
-| `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       |
-| `CMakeSandbox::api_status`      | INTERFACE   | `api_status.hpp` tagging macros               |
+| CMake target                    | Type        | What it provides                              | API status   |
+|---------------------------------|-------------|-----------------------------------------------|--------------|
+| `CMakeSandbox::geo::shapes`     | SHARED lib  | `Circle`, `Rectangle`, `Triangle` + concepts  | Supported    |
+| `CMakeSandbox::geo`             | INTERFACE   | Alias grouping all geo targets                | Supported    |
+| `CMakeSandbox::bio::animals`    | SHARED lib  | `Dog`, `Cat`, `Bird`                          | Experimental |
+| `CMakeSandbox::bio`             | INTERFACE   | Alias grouping all bio targets                | Experimental |
+| `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     | Supported    |
+| `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       | Supported    |
 
 ---
 
-## API-status tagging system
+## CMake-level API-status tagging
 
-`include/CMakeSandbox/api_status.hpp` provides three macros that annotate the
-support status of public APIs.  Place each macro **after** the leading keyword
-(`class`, `struct`, `void`, …):
-
-```cpp
-#include "CMakeSandbox/api_status.hpp"
-
-class CMSB_SUPPORTED   Circle { … };   // stable, fully supported
-class CMSB_EXPERIMENTAL Animal { … };  // may change; opt-in required
-CMSB_DEPRECATED("Use print_shape_info() instead.") void print_info(…);
-```
+`cmake/ApiStatus.cmake` provides the `cmsb_set_target_status()` function that
+records an API-support classification on each CMake target.  The status is
+stored as the `CMSB_API_STATUS` target property and governs configure-time and
+install-time diagnostics.
 
 ### Status levels
 
-| Macro | Meaning | Compiler effect |
+| Status | Meaning | CMake effect |
 |---|---|---|
-| `CMSB_SUPPORTED` | Stable, fully-supported API | Expands to nothing (documentation annotation) |
-| `CMSB_EXPERIMENTAL` | May change without notice | Emits a `[[deprecated]]`-style warning at every use site |
-| `CMSB_DEPRECATED("reason")` | Scheduled for removal | Emits a `[[deprecated("reason")]]` warning at every use site |
+| `SUPPORTED` | Stable, fully supported | `message(STATUS ...)` at configure time |
+| `EXPERIMENTAL` | API or behaviour may change without notice; avoid in production | `message(WARNING ...)` at configure time + install-time warning |
+| `DEPRECATED` | Scheduled for removal in a future release | `message(WARNING ...)` at configure time + install-time warning |
 
-### Opting in to experimental APIs
+### Usage
 
-The recommended approach is to pass the preprocessor macro via your build
-system so it applies consistently across all translation units.
-
-**CMake (preferred for FetchContent consumers):**
+Call `cmsb_set_target_status()` in a target's `CMakeLists.txt` after the
+target is defined:
 
 ```cmake
-set(CMSB_ENABLE_EXPERIMENTAL ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(CMakeSandbox)
-target_link_libraries(my_app PRIVATE
-    CMakeSandbox::api_status        # propagates CMSB_ENABLE_EXPERIMENTAL
-    CMakeSandbox::bio::animals
-)
+add_library(sandbox_bio_animals)
+# … sources, link libraries, install rules …
+cmsb_set_target_status(sandbox_bio_animals EXPERIMENTAL)
 ```
 
-**Compiler flag:**
+At configure time CMake will print:
 
-```bash
-g++ -DCMSB_ENABLE_EXPERIMENTAL …
+```
+CMake Warning: [CMakeSandbox] Target 'sandbox_bio_animals' is EXPERIMENTAL –
+  its API and behaviour may change between releases without notice.
+  Do not rely on it in production builds.
 ```
 
-**Per-translation-unit `#define` (use only when the above are not available):**
-The macro must appear before the first CMakeSandbox header include in that file.
+At install time (`cmake --install`) the same target triggers:
 
-```cpp
-#define CMSB_ENABLE_EXPERIMENTAL
-#include "CMakeSandbox/bio/animals/dog.hpp"
+```
+WARNING: [CMakeSandbox] Installing EXPERIMENTAL target 'sandbox_bio_animals'.
+  Its API may change without notice.
 ```
 
-### Silencing deprecated warnings only
+### Inspecting the status of a target
 
-```cpp
-#define CMSB_NO_DEPRECATED_WARNINGS
-#include "CMakeSandbox/math/algorithms.hpp"
+```cmake
+get_target_property(status sandbox_bio_animals CMSB_API_STATUS)
+message(STATUS "sandbox_bio_animals: ${status}")   # → EXPERIMENTAL
 ```
-
-### Current API-status map
-
-| Component | Status |
-|---|---|
-| `CMakeSandbox::geo::shapes` – `Circle`, `Rectangle`, `Triangle`, `Shape` | **Supported** |
-| `CMakeSandbox::math` – `Vec2D<T>`, `Numeric`, `max_area`, `total_area` | **Supported** |
-| `CMakeSandbox::bio::animals` – `Animal`, `Dog`, `Cat`, `Bird` | **Experimental** |
-| `CMakeSandbox::math::print_info` | **Deprecated** – use `print_shape_info()` |
 
 ---
 
@@ -282,7 +261,6 @@ FetchContent_MakeAvailable(CMakeSandbox)
 | `CMakeSandbox::bio`             | INTERFACE   | Umbrella – links all bio targets               |
 | `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     |
 | `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       |
-| `CMakeSandbox::api_status`      | INTERFACE   | `api_status.hpp` tagging macros               |
 
 #### Full consumer `CMakeLists.txt`
 

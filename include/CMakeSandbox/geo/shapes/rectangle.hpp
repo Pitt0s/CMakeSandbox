@@ -6,7 +6,7 @@
 
 namespace CMakeSandbox::geo::shapes {
 
-class CMSB_SUPPORTED Rectangle final : public Shape {
+class Rectangle final : public Shape {
 public:
     Rectangle(double width, double height);
 

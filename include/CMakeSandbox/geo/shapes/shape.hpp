@@ -4,14 +4,12 @@
 
 #pragma once
 
-#include "CMakeSandbox/api_status.hpp"
-
 #include <string>
 
 namespace CMakeSandbox::geo::shapes {
 
 /// Abstract base class – models the OOP (runtime) polymorphism side.
-class CMSB_SUPPORTED Shape {
+class Shape {
 public:
     Shape()                          = default;
     Shape(const Shape&)              = default;

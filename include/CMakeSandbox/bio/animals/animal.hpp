@@ -4,14 +4,12 @@
 
 #pragma once
 
-#include "CMakeSandbox/api_status.hpp"
-
 #include <string>
 #include <string_view>
 
 namespace CMakeSandbox::bio::animals {
 
-class CMSB_EXPERIMENTAL Animal {
+class Animal {
 public:
     explicit Animal(std::string_view name);
     Animal(const Animal&)              = default;

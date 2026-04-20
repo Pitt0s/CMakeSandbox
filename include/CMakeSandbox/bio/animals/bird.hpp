@@ -6,7 +6,7 @@
 
 namespace CMakeSandbox::bio::animals {
 
-class CMSB_EXPERIMENTAL Bird final : public Animal {
+class Bird final : public Animal {
 public:
     explicit Bird(std::string_view name);
 

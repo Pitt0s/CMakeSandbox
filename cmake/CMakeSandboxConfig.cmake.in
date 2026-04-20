@@ -39,8 +39,5 @@ endif()
 if(NOT TARGET CMakeSandbox::version)
     add_library(CMakeSandbox::version      ALIAS CMakeSandbox::sandbox_version)
 endif()
-if(NOT TARGET CMakeSandbox::api_status)
-    add_library(CMakeSandbox::api_status   ALIAS CMakeSandbox::sandbox_api_status)
-endif()
 
 check_required_components(CMakeSandbox)
