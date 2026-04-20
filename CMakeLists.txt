@@ -49,6 +49,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ============================================================================
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(CompilerOptions)
+include(ApiStatus)
 
 # ============================================================================
 # Optional: clang-tidy (enable via -DCMSB_ENABLE_CLANG_TIDY=ON or preset)

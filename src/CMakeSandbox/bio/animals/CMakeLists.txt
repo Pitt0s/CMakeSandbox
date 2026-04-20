@@ -34,6 +34,9 @@ target_sources(sandbox_bio_animals
 
 target_link_libraries(sandbox_bio_animals PRIVATE CMakeSandbox::compiler_flags)
 
+# Tag this target's API-support status.
+cmsb_set_target_status(sandbox_bio_animals EXPERIMENTAL)
+
 # ============================================================================
 # Install
 # ============================================================================

@@ -13,6 +13,7 @@ The primary goal is to prove out the CMake patterns needed before applying them 
 - CMake presets and workflows
 - `clang-tidy` integration
 - `Version.hpp` generated from a CMake template
+- **CMake-level API-status tagging** (`cmsb_set_target_status()`)
 
 ---
 
@@ -87,14 +88,64 @@ CMakeSandbox/
 
 ## CMake targets
 
-| CMake target                    | Type        | What it provides                              |
-|---------------------------------|-------------|-----------------------------------------------|
-| `CMakeSandbox::geo::shapes`     | SHARED lib  | `Circle`, `Rectangle`, `Triangle` + concepts  |
-| `CMakeSandbox::geo`             | INTERFACE   | Alias grouping all geo targets                |
-| `CMakeSandbox::bio::animals`    | SHARED lib  | `Dog`, `Cat`, `Bird`                          |
-| `CMakeSandbox::bio`             | INTERFACE   | Alias grouping all bio targets                |
-| `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     |
-| `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       |
+| CMake target                    | Type        | What it provides                              | API status   |
+|---------------------------------|-------------|-----------------------------------------------|--------------|
+| `CMakeSandbox::geo::shapes`     | SHARED lib  | `Circle`, `Rectangle`, `Triangle` + concepts  | Supported    |
+| `CMakeSandbox::geo`             | INTERFACE   | Alias grouping all geo targets                | Supported    |
+| `CMakeSandbox::bio::animals`    | SHARED lib  | `Dog`, `Cat`, `Bird`                          | Experimental |
+| `CMakeSandbox::bio`             | INTERFACE   | Alias grouping all bio targets                | Experimental |
+| `CMakeSandbox::math`            | INTERFACE   | `Vec2D<T>`, `Numeric` concept, algorithms     | Supported    |
+| `CMakeSandbox::version`         | INTERFACE   | Generated `version.hpp`                       | Supported    |
+
+---
+
+## CMake-level API-status tagging
+
+`cmake/ApiStatus.cmake` provides the `cmsb_set_target_status()` function that
+records an API-support classification on each CMake target.  The status is
+stored as the `CMSB_API_STATUS` target property and governs configure-time and
+install-time diagnostics.
+
+### Status levels
+
+| Status | Meaning | CMake effect |
+|---|---|---|
+| `SUPPORTED` | Stable, fully supported | `message(STATUS ...)` at configure time |
+| `EXPERIMENTAL` | API or behaviour may change without notice; avoid in production | `message(WARNING ...)` at configure time + install-time warning |
+| `DEPRECATED` | Scheduled for removal in a future release | `message(WARNING ...)` at configure time + install-time warning |
+
+### Usage
+
+Call `cmsb_set_target_status()` in a target's `CMakeLists.txt` after the
+target is defined:
+
+```cmake
+add_library(sandbox_bio_animals)
+# … sources, link libraries, install rules …
+cmsb_set_target_status(sandbox_bio_animals EXPERIMENTAL)
+```
+
+At configure time CMake will print:
+
+```
+CMake Warning: [CMakeSandbox] Target 'sandbox_bio_animals' is EXPERIMENTAL –
+  its API and behaviour may change between releases without notice.
+  Do not rely on it in production builds.
+```
+
+At install time (`cmake --install`) the same target triggers:
+
+```
+WARNING: [CMakeSandbox] Installing EXPERIMENTAL target 'sandbox_bio_animals'.
+  Its API may change without notice.
+```
+
+### Inspecting the status of a target
+
+```cmake
+get_target_property(status sandbox_bio_animals CMSB_API_STATUS)
+message(STATUS "sandbox_bio_animals: ${status}")   # → EXPERIMENTAL
+```
 
 ---
 
